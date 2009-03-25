@@ -1,0 +1,144 @@
+<%
+	case @lang
+	when /^ja/
+		basic_header = "基本設定"
+		basic_path_label = "静的HTMLを生成するディレクトリのパス"
+		basic_url_label = "静的HTMLを生成するディレクトリのURL"
+		basic_ruby_label = "Rubyインタープリタの場所"
+		basic_suffix_label = "CGIにつける拡張子(例: .cgi)。(オプション)"
+		basic_smtp_host_label = "メール送信時に使用するSMTPサーバ名(オプション)"
+		basic_smtp_from_label = "メール送信時に使用する送信者メールアドレス(オプション)"
+		basic_password_label = "パスワードを変更したい場合のみ入力"
+		basic_password2_label = "確認のためパスワード再入力"
+		basic_bad_path = "パスが正しくないか、書き込めませんでした"
+		basic_bad_url = "URLが正しくありません"
+		basic_bad_ruby = "Rubyのパスが正しくありません"
+		basic_bad_password = "パスワードが一致しませんでした"
+		basic_success = "基本設定の変更が成功しました。"
+		create_header = "掲示板の新規作成"
+		create_name_label = "掲示板の名称(英数字。ただし'rubbs','admin','conf','lock'で始まる名前は使えません"
+		create_encoding_label = "使用する文字コード"
+		create_bad_name = "掲示板の名称が正しくありません。"
+		create_already_exist = "指定された掲示板はすでに存在しています。"
+		create_bad_encoding = "指定された文字コードが正しくありません。"
+		migrate_header = "旧バージョンからの移行"
+		migrate_note = "RuBBS 0.3.x以前の内容を移行できます。掲示板の設定は移行できません。先に空の掲示板を作成してからこの作業を行なってください。"
+		migrate_src_label = "旧掲示板データのDBファイル名(拡張子除く。「test」掲示板の場合の例: <code>/var/www/html/bbs/test</code>)"
+		migrate_dest_label = "新掲示板の名前"
+		migrate_dbm_exist = "このシステムではDBMが使えないので、移行不能です。"
+		migrate_bad_src = "旧掲示板データのファイル名が正しくありません。"
+		migrate_bad_dest = "新掲示板の名前が正しくありません。"
+		migrate_success = "旧掲示板から#{@migrate_dest}への移行が終わりました。"
+		submit_label = " 設定 "
+		test_error = "tes error"
+	else
+		basic_header = "Basic Settings"
+		basic_path_label = "Path of directory that have static HTML files"
+		basic_url_label = "URL of directory same as above"
+		basic_ruby_label = "Path of Ruby interpreter"
+		basic_suffix_label = "CGI command suffix (.cgi) if you need (Option)"
+		basic_smtp_host_label = "SMTP host name (Option)"
+		basic_smtp_from_label = "SMTP from E-mail address (Option)"
+		basic_password_label = "Password when you want change"
+		basic_password2_label = "Password again"
+		basic_bad_path = "Path was not correct or bad permission."
+		basic_bad_url = "URL was wrong."
+		basic_bad_ruby = "Bad Ruby interpreter path."
+		basic_bad_password = "Password dose not match."
+		basic_success = "Changing basic setting succeed."
+		create_header = "BBS Creation"
+		create_name_label = "BBS name as alphabetical (But the name dose not start with 'rubbs', 'admin', 'conf' or 'lock')."
+		create_encoding_label = "Encoding charset of BBS"
+		create_bad_name = "Bad BBS name."
+		create_already_exist = "The BBS already existent."
+		create_bad_encoding = "Bad charactor encoding."
+		submit_label = " Set "
+	end
+%><?xml version="1.0" encoding="<%= @encoding %>"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="<%= @lang %>">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=<%= @encoding %>" />
+	<meta name="Author" content="TADA Tadashi" />
+	<link rev="MADE" href="mailto:sho@spc.gr.jp" />
+	<meta name="KeyWords" content="RuBBS,Ruby,S.P.C." />
+	<link rel="INDEX" href="http://www.spc.gr.jp/bbs/RuBBS.html" />
+	<meta http-equiv="content-style-type" content="text/css" media="all" />
+	<link rel="stylesheet" href="<%= @url + 'rubbs.css' %>" type="text/css" media="all" />
+	<title>RuBBS Administration Tool</title>
+</head>
+<body>
+<h1>RuBBS Administration Tool</h1>
+
+<% if @error then %><p class="msg"><%= eval( @error ) %></p><% end %>
+
+<form class="conf" action="<%= ENV['SCRIPT_NAME'] %>" method="post"><div>
+<input type="hidden" name="action" value="basic" />
+<input type="hidden" name="crypt" value="<%= @password %>" />
+<div class="conf">
+<h2><%= basic_header %></h2>
+<%= basic_path_label %>:<br />
+<input class="conf" name="path" value="<%= @path %>" size="60" /><br />
+<%= basic_url_label %>:<br />
+<input class="conf" name="url" value="<%= @url %>" size="60" /><br />
+<%= basic_ruby_label %>:<br />
+<input class="conf" name="ruby" value="<%= @ruby %>" size="60" /><br />
+<%= basic_suffix_label %>:<br />
+<input class="conf" name="suffix" value="<%= @suffix %>" size="60" /><br />
+<%= basic_smtp_host_label %>:<br />
+<input class="conf" name="smtp_host" value="<%= @smtp_host %>" size="60" /><br />
+<%= basic_smtp_from_label %>:<br />
+<input class="conf" name="smtp_from" value="<%= @smtp_from %>" size="60" /><br />
+<%= basic_password_label %>:<br />
+<input class="conf" type="password" name="password" /><br />
+<%= basic_password2_label %>:<br />
+<input class="conf" type="password" name="password2" /><br />
+</div>
+<input class="conf" type="submit" value="<%= submit_label %>" />
+</div></form>
+<hr />
+
+<form class="conf" action="<%= ENV['SCRIPT_NAME'] %>" method="post"><div>
+<input type="hidden" name="action" value="create" />
+<input type="hidden" name="crypt" value="<%= @password %>" />
+<div class="conf">
+<h2><%= create_header %></h2>
+<%= create_name_label %>:<br />
+<input class="conf" name="name" value="<%= @bbs_name %>" /><br />
+<%= create_encoding_label %>:<br />
+<select class="conf" name="encoding">
+	<option value="ISO-8859-1">ISO-8859-1 (Latin)</option>
+	<option value="ISO-2022-JP" <%= /^ja/=~@lang ? 'selected' : '' %>>ISO-2022-JP (Japanese JIS)</option>
+	<option value="EUC-JP">EUC-JP (Japanese EUC)</option>
+	<option value="Shift_JIS">Shift_JIS (Japanese SHIFT JIS)</option>
+</select><br />
+</div>
+<input class="conf" type="submit" value="<%= submit_label %>" />
+</div></form>
+<hr />
+
+<% if /^ja/ =~ @lang then %>
+<form class="conf" action="<%= ENV['SCRIPT_NAME'] %>" method="post"><div>
+<input type="hidden" name="action" value="migrate" />
+<input type="hidden" name="crypt" value="<%= @password %>" />
+<div class="conf">
+<h2><%= migrate_header %></h2>
+<p><%= migrate_note %></p>
+<%= migrate_src_label %>:<br />
+<input class="conf" name="src" value="<%= @migrate_src %>" size="60" /><br />
+<%= migrate_dest_label %>:<br />
+<input class="conf" name="dest" value="<%= @migrate_dest %>" /><br />
+</div>
+<input class="conf" type="submit" value="<%= submit_label %>" />
+</div></form>
+<hr />
+<% end %>
+
+<p class="copyright">
+Generated by <a href="http://www.spc.gr.jp/bbs/RuBBS.html">RuBBS</a> version <%= RUBBS_VERSION %><br />
+Powered by <a href="http://www.ruby-lang.org/">Ruby</a> version <%= RUBY_VERSION %>
+</p>
+
+</body>
+</html>
+

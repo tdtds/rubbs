@@ -1,0 +1,200 @@
+#!/usr/bin/env ruby
+
+$KCODE = 'euc'
+begin
+	require 'rubbs'
+rescue LoadError
+	print "Content-Type: text/plain\r\n\r\n"
+	print "RuBBS Administration Tool\n\n"
+	print "There is an error! Confirm your settins again.\n\n"
+	print "#$!\n"
+	print $@.join( "\n" )
+	exit
+end
+
+def init
+	@cgi = CGI::new
+
+	# loading rubbs.conf
+	begin
+		File::readlines( 'rubbs.conf' ).each do |line| instance_eval( line ) end
+	rescue
+	end
+	jump_to_init if not (@url and @path and @ruby and @password)
+
+	# check password
+	if @cgi.valid?( 'action' ) then
+		jump_to_init if not @cgi.valid?( 'crypt' ) or @cgi.params['crypt'][0] != @password
+	else
+		jump_to_init if not @cgi.valid?( 'password' ) or
+				@cgi.params['password'][0].crypt( @password ) != @password
+	end
+
+	# set encoding and other variables
+	case ENV['HTTP_ACCEPT_LANGUAGE'].gsub( /\s+/, '' )
+	when /^ja/
+		@encoding = 'ISO-2022-JP'
+		@lang = 'ja-JP'
+	else
+		@encoding = 'ISO-8859-1'
+		@lang = 'en_JS'
+	end
+	@error = nil
+end
+
+def jump_to_init
+	admin_init = File::basename( ENV['SCRIPT_NAME'] ).sub( /admin/, 'admin-init' )
+	print @cgi.header( 'Location' => admin_init )
+	exit
+end
+
+def basic
+	@error = 'basic_bad_path'
+	return form if not @cgi.valid?( 'path' )
+	@path = @cgi.params['path'][0]
+	@path += '/' if /\/$/ !~ @path
+	begin
+		Dir::mkdir( "#{@path}admin" )
+		Dir::rmdir( "#{@path}admin" )
+	rescue
+		return form
+	end
+
+	@error = 'basic_bad_url'
+	return form if not @cgi.valid?( 'url' )
+	@url = @cgi.params['url'][0]
+	@url += '/' if /\/$/ !~ @url
+
+	@error = 'basic_bad_ruby'
+	return form if not @cgi.valid?( 'ruby' )
+	@ruby = @cgi.params['ruby'][0]
+	return form if not FileTest::executable?( @ruby )
+
+	@error = 'basic_bad_password'
+	if @cgi.valid?( 'password' ) then
+		if @cgi.params['password'][0] == @cgi.params['password2'][0] then
+			@password = @cgi.params['password'][0].crypt( String::salt )
+		else
+			return form
+		end
+	end
+
+	@error = 'basic_success'
+	@suffix = @cgi.params['suffix'][0] or nil
+	@smtp_host = @cgi.params['smtp_host'][0] or nil
+	@smtp_from = @cgi.params['smtp_from'][0] or nil
+	
+	File::open( 'rubbs.conf', 'w' ) do |f|
+		f.puts %Q[@path = "#{@path}"]
+		f.puts %Q[@url = "#{@url}"]
+		f.puts %Q[@ruby = "#{@ruby}"]
+		f.puts %Q[@suffix = "#{@suffix}"]
+		f.puts %Q[@smtp_host = "#{@smtp_host}"]
+		f.puts %Q[@smtp_from = "#{@smtp_from}"]
+		f.puts %Q[@password = "#{@password}"]
+	end
+
+	# copying default css file
+	if not FileTest::exist?( "#{@path}rubbs.css" ) then
+		File::open( 'conf/rubbs.css' ) do |i|
+			File::open( "#{@path}rubbs.css", 'w' ) do |o|
+				o.write( i.read )
+			end
+		end
+	end
+
+	return form
+end
+
+def create
+	@error = 'create_bad_name'
+	return form if not @cgi.valid?( 'name' )
+	@bbs_name = @cgi.params['name'][0]
+	return form if /^(rubbs|admin|conf|lock)/ =~ @bbs_name or /[^\w]+/ =~ @bbs_name
+	@error = 'create_already_exist'
+	return form if FileTest::exist?( @bbs_name )
+
+	@error = 'create_bad_encoding'
+	return form if not @cgi.valid?( 'encoding' )
+	@bbs_encoding = @cgi.params['encoding'][0]
+
+	# command file
+	File::open( "#{@bbs_name}#{@suffix}", 'w' ) do |f|
+		f.puts %Q[#!#{@ruby} -Ke]
+		f.puts %Q[require "rubbs"]
+		f.puts %Q[RuBBS::new]
+	end
+	File::chmod( 0744, "#{@bbs_name}#{@suffix}" )
+
+	# configuration file
+	File::open( "#{@bbs_name}.conf", 'w' ) do |f|
+		f.puts %Q[@name = "#{@bbs_name}"]
+		f.puts %Q[@encoding = "#{@bbs_encoding}"]
+		f.puts %Q[@title = "#{@bbs_name}"]
+		f.puts %Q[@header1 = "#{@bbs_name}"]
+		f.puts %Q[@style_sheet = "#{@url}rubbs.css"]
+	end
+
+	# lock file
+	File::open( "lock/#{@bbs_name}", 'w' ) do |f|
+		f.puts Time::now
+		f.puts ENV['REMOTE_ADDR']
+	end
+
+	@error = nil
+	print @cgi.header( 'Location' => "#{@bbs_name}#{@suffix}?action=maintenance" )
+end
+
+def migrate
+	begin
+		require 'dbm'
+	rescue LoadError
+		@error = 'migrate_dbm_exist'
+		return form
+	end
+
+	@error = 'migrate_bad_src'
+	return form if not @cgi.valid?( 'src' )
+	@migrate_src = @cgi.params['src'][0]
+	begin
+		src = DBM::open( @migrate_src )
+	rescue
+		return form
+	end
+	return form if not src['latest']
+
+	@error = 'migrate_bad_dest'
+	return form if not @cgi.valid?( 'dest' )
+	@migrate_dest = @cgi.params['dest'][0]
+	return form if /^(rubbs|admin|conf|lock)/ =~ @migrate_dest or /[^\w]+/ =~ @migrate_dest
+	dest = DBClass::open( "#{@migrate_dest}#{DB_SUFFIX}" )
+
+	src.keys.each do |key| dest[key] = src[key].native; end
+	dest.close
+	src.close
+	@error = 'migrate_success'
+	return form
+end
+
+def form
+	if not @suffix then
+		suffix = File::basename( ENV['SCRIPT_NAME'] ).sub( /admin/, '' )
+		@suffix = suffix if suffix.length > 0
+	end
+	print @cgi.header( { 'type' => 'text/html', 'charset' => @encoding } )
+	rhtml = File::readlines( 'conf/admin.form.rhtml' ).join
+	print ERbLight::new( rhtml ).result( binding ).nkf( @encoding )
+end
+
+init
+case @cgi.params['action'][0]
+when 'basic'
+	basic
+when 'create'
+	create
+when 'migrate'
+	migrate
+else
+	form
+end
+

@@ -1,0 +1,214 @@
+<%
+	case @lang
+	when /^ja/
+		remove_and_restore = "削除と復活"
+		remove_header = "投稿の削除"
+		remove_submit_label = " 削除 "
+		restore_header = "投稿の復活"
+		restore_submit_label = " 復活 "
+
+		rebuild_html = "HTMLの再生成"
+		rebuild_html_button = " 生成 "
+
+		configuration_header = "掲示板の設定"
+		owner_header = "管理人に関する情報"
+		owner_name_label = "名前。HTMLヘッダ中に記述されます"
+		owner_mail_label = "E-mailアドレス。これもヘッダ中に記述されます"
+		owner_password_label = "パスワード。変更したい場合のみ入力してください"
+		owner_password2_label = "確認のためのパスワード再入力"
+		bbs_header = "掲示板の基本設定"
+		bbs_title_header = "タイトル(&lt;title&gt;タグで使われます)"
+		bbs_encoding_label = "使用文字コード"
+		bbs_keywords_label = "検索エンジン用キーワード(カンマ区切り)"
+		bbs_stylesheet_label = "スタイルシートのURL"
+		header_header = "ヘッダとフッタ"
+		header_note = "以下の設定には、HTMLタグを利用できます。"
+		header_title_label = "タイトル(&lt;H1&gt;タグで囲まれます)"
+		header_header_label = "ヘッダ(ページの最初、タイトルの下に表示されます)"
+		header_footer_label = "フッタ(ページの最後に表示されます)"
+		limit_header = "サイズと制限値"
+		limit_width_label = "投稿用TEXTAREAの幅"
+		limit_height_label = "投稿用TEXTAREAの高さ"
+		limit_articles_label = "1ページあたりの投稿数"
+		mail_header = "E-mail配信の設定"
+		mail_to_label = "配信先のE-mailアドレス一覧(1行1アドレス)"
+		mail_reply_label = "配信メールのReply-ToおよびToに記述されるアドレス"
+		submit_label = " 設定 "
+	else
+		remove_and_restore = "Remove and Restore"
+		remove_header = "Remove an Article"
+		remove_submit_label = "Remove"
+		restore_header = "Restore an Article"
+		restore_submit_label = "Restore"
+
+		rebuild_html = "Rebuild HTML File"
+		rebuild_html_button = "Rebuild"
+
+		configuration_header = "Configuration"
+		owner_header = "Owner's information"
+		owner_name_label = "Your name. This is shown in HTML header"
+		owner_mail_label = "Your E-mail address shown in HTML header too"
+		owner_password_label = "Password. Fill if you want to change it"
+		owner_password2_label = "Password once again."
+		bbs_header = "BBS configuration"
+		bbs_title_header = "Title. This is shown in &lt;title&gt; tag in HTML"
+		bbs_encoding_label = "Language encoding charset"
+		bbs_keywords_label = "Keywords for search engine. Separate by ','"
+		bbs_stylesheet_label = "URL of Style Sheet"
+		header_header = "Header and Footer"
+		header_note = "You can use HTML tags in these fields."
+		header_title_label = "BBS title using in &lt;H1&gt; tag in HTML"
+		header_header_label = "Header messages. This is shown below title"
+		header_footer_label = "Footer messages. This is shown in bottom of Page"
+		limit_header = "Sizes and Limits"
+		limit_width_label = "Width of textarea in posting form"
+		limit_height_label = "Height of textarea in posting form"
+		limit_articles_label = "Articles in each pages"
+		mail_header = "Setting of E-mail"
+		mail_to_label = "List of E-mail address sending when each posting"
+		mail_reply_label = "E-mail address for Reply-To (and To) fields in sending above"
+		submit_label = "Submit"
+	end
+	ti = 0
+%><?xml version="1.0" encoding="<%= @encoding %>"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xml:lang="<%= @lang %>">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=<%= @encoding %>" />
+	<meta name="Author" content="TADA Tadashi" />
+	<link rev="MADE" href="mailto:sho@spc.gr.jp" />
+	<meta name="KeyWords" content="S.P.C.,RuBBS" />
+	<link rel="INDEX" href="http://www.spc.gr.jp/bbs/RuBBS.html" />
+	<meta http-equiv="content-style-type" content="text/css" media="all" />
+	<link rel="stylesheet" href="<%= @style_sheet %>" type="text/css" media="all" />
+	<title><%= @title %>: Configuration</title>
+</head>
+<body>
+<%
+	if @m_msg then
+		msg = @m_msg.sub( /#/, @m_serial )
+%>
+<p class="msg"><%= msg %></p>
+<hr />
+<%
+	end
+%>
+
+<h1><%= @header1 %>: <%= remove_and_restore %></h1>
+
+<% if @latest > 1 %>
+<form class="conf" action="<%= @cgi_url %>" method="post">
+<div class="conf">
+<input type="hidden" name="action" value="remove" />
+<input type="hidden" name="crypt" value="<%= @password %>" />
+<h2><%= remove_header %></h2>
+<input class="conf" name="serial" tabindex="<%=ti+=1%>" />
+<input type="submit" value="<%= remove_submit_label %>" tabindex="<%=ti+=1%>" />
+</div>
+</form>
+
+<form class="conf" action="<%= @cgi_url %>" method="post">
+<div class="conf">
+<input type="hidden" name="action" value="restore" />
+<input type="hidden" name="crypt" value="<%= @password %>" />
+<h2><%= restore_header %></h2>
+<input class="conf" name="serial" tabindex="<%=ti+=1%>" />
+<input type="submit" value="<%= restore_submit_label %>" tabindex="<%=ti+=1%>" />
+</div>
+</form>
+<% end # if @latest > 1 %>
+
+<form class="conf" action="<%= @cgi_url %>" method="post">
+<div class="conf">
+<h2><%= rebuild_html %></h2>
+<input type="hidden" name="effect" value="yes" />
+<input type="submit" value="<%= rebuild_html_button %>" tabindex="<%=ti+=1%>" />
+</div>
+</form>
+
+<hr />
+
+<h1><%= @header1 %>: <%= configuration_header %></h1>
+
+<form class="conf" action="<%= @cgi_url %>" method="post"><div>
+<input type="hidden" name="action" value="configure" />
+<input type="hidden" name="crypt" value="<%= @password %>" />
+<div class="conf">
+<h2><%= owner_header %></h2>
+<%= owner_name_label %>:<br />
+	<input class="conf" name="owner" value="<%= @owner %>" size="50" tabindex="<%=ti+=1%>" /><br />
+<%= owner_mail_label %>:<br />
+	<input class="conf" name="mail" value="<%= @mail %>" size="50" tabindex="<%=ti+=1%>" /><br />
+<%= owner_password_label %>:<br />
+	<input class="conf" type="password" name="password" size="50" tabindex="<%=ti+=1%>" /><br />
+<%= owner_password2_label %>:<br />
+	<input class="conf" type="password" name="password2" size="50" tabindex="<%=ti+=1%>" /><br />
+</div>
+
+<p><input type="submit" value="<%= submit_label %>" tabindex="<%=ti+=1%>" /></p>
+
+<div class="conf">
+<h2><%= bbs_header %></h2>
+<%= bbs_title_header %><br />
+	<input class="conf" name="title" value="<%= @title %>" size="80" tabindex="<%=ti+=1%>" /><br />
+<%= bbs_encoding_label %>:<br />
+	<select class="conf" name="encoding">
+		<option value="ISO-8859-1">ISO-8859-1 (Latin)</option>
+		<option value="ISO-2022-JP" <%= /ISO-2022-JP/=~@encoding ? 'selected="selected"' : '' %>>ISO-2022-JP (Japanese)</option>
+		<option value="EUC-JP" <%= /EUC-JP/=~@encoding ? 'selected="selected"' : '' %>>EUC-JP (Japanese EUC-JP)</option>
+		<option value="Shift_JIS" <%= /Shift_JIS/=~@encoding ? 'selected' : '' %>>Shift_JIS (Japanese SHIFT JIS)</option>
+	</select><br />
+<%= bbs_keywords_label %>:<br />
+	<input class="conf" name="keywords" value="<%= CGI::escapeHTML @keywords %>" size="80" tabindex="<%=ti+=1%>" /><br />
+<%= bbs_stylesheet_label %>:<br />
+	<input class="conf" name="style_sheet" value="<%= @style_sheet %>" size="80" tabindex="<%=ti+=1%>" /><br />
+</div>
+
+<p><input type="submit" value="<%= submit_label %>" tabindex="<%=ti+=1%>" /></p>
+
+<div class="conf">
+<h2><%= header_header %></h2>
+<%= header_note %><br />
+<%= header_title_label %>:<br />
+	<input class="conf" name="header1" value="<%= CGI::escapeHTML @header1 %>" size="80" tabindex="<%=ti+=1%>" /><br />
+<%= header_header_label %>:<br />
+	<textarea class="conf" name="header" cols="80" rows="5" tabindex="<%=ti+=1%>"><%= CGI::escapeHTML @header %></textarea><br />
+<%= header_footer_label %>:<br />
+	<textarea class="conf" name="footer" cols="80" rows="5" tabindex="<%=ti+=1%>"><%= CGI::escapeHTML @footer %></textarea><br />
+</div>
+
+<p><input type="submit" value="<%= submit_label %>" tabindex="<%=ti+=1%>" /></p>
+
+<div class="conf">
+<h2><%= limit_header %></h2>
+<%= limit_width_label %>:<br />
+	<input class="conf" name="limit_cols" value="<%= @limit_cols %>" size="10" tabindex="<%=ti+=1%>" /><br />
+<%= limit_height_label %>:<br />
+	<input class="conf" name="limit_rows" value="<%= @limit_rows %>" size="10" tabindex="<%=ti+=1%>" /><br />
+<%= limit_articles_label %>:<br />
+	<input class="conf" name="limit_per_page" value="<%= @limit_per_page %>" size="10" tabindex="<%=ti+=1%>" /><br />
+</div>
+
+<p><input type="submit" value="<%= submit_label %>" tabindex="<%=ti+=1%>" /></p>
+
+<div class="conf">
+<h2><%= mail_header %></h2>
+<%= mail_to_label %>:<br />
+	<textarea class="conf" name="mail_to" cols="80" rows="5" tabindex="<%=ti+=1%>"><%= @mail_to.join( "\n" ) %></textarea><br />
+<%= mail_reply_label %>:<br />
+	<input class="conf" name="mail_reply" value="<%= @mail_reply %>" size="50" tabindex="<%=ti+=1%>" /><br />
+</div>
+
+<p><input type="submit" value="<%= submit_label %>" tabindex="<%=ti+=1%>" /></p>
+
+</div></form>
+<hr />
+
+<p class="copyright">
+Generated by <a href="http://www.spc.gr.jp/bbs/RuBBS.html">RuBBS</a> version <%= RUBBS_VERSION %><br />
+Powered by <a href="http://www.ruby-lang.org/">Ruby</a> version <%= RUBY_VERSION %>
+</p>
+
+</body>
+</html>
+

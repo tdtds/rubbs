@@ -1,0 +1,25 @@
+@owner = '<%= @cgi.params['owner'][0].native %>'
+@mail = '<%= @cgi.params['mail'][0].native %>'
+@password = <% if @new_password then %>'<%= @new_password %>'<% else %>nil<% end %>
+@encoding = '<%= @cgi.params['encoding'][0] %>'
+@keywords = <<__KEYWORD__
+<%= @cgi.params['keywords'][0].native %>
+__KEYWORD__
+@style_sheet = '<%= @cgi.params['style_sheet'][0] %>'
+@title = <<__TITLE__
+<%= @cgi.params['title'][0].native %>
+__TITLE__
+@header1 = <<__HEADER1__
+<%= @cgi.params['header1'][0].native %>
+__HEADER1__
+@header = <<HEADER
+<%= @cgi.params['header'][0].native.sub( /\n+\z/, '' ) %>
+HEADER
+@footer = <<FOOTER
+<%= @cgi.params['footer'][0].native.sub( /\n+\z/, '' ) %>
+FOOTER
+@limit_cols = <%= @cgi.params['limit_cols'][0].to_i %>
+@limit_rows = <%= @cgi.params['limit_rows'][0].to_i %>
+@limit_per_page = <%= @cgi.params['limit_per_page'][0].to_i %>
+@mail_to = [<%= @cgi.params['mail_to'][0].native.to_a.collect{|i|'"'+i.chomp+'"'}.delete_if{|i|i.length==2}.join(',') %>]
+@mail_reply = '<%= @cgi.params['mail_reply'][0] %>'

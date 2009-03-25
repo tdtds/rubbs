@@ -1,0 +1,156 @@
+#!/usr/bin/env ruby
+begin
+	require 'rubbs'
+rescue LoadError
+	print "Content-Type: text/plain\r\n\r\n"
+	print "RuBBS Administration Tool\n\n"
+	print "There is an error! Confirm your settins again.\n\n"
+	print "#$!\n"
+	print $@.join( "\n" )
+	exit
+end
+
+$title = "RuBBS Administration Tool"
+
+$permission_error = <<PERMISSION_ERROR
+<html>
+<head><title>#{$title} - permission error</title></head>
+<body>
+<h1>#{$title} - permission error</h1>
+<p>I cannot make file in "<code>#{File::dirname( ENV['SCRIPT_NAME'] )}</code>".</p>
+<p>Change permission to be able to access by WWW server.<br />
+<p>ex. <code>chmod o+w #{File::dirname( ENV['SCRIPT_NAME'] )}</code></p>
+</body>
+</html>
+PERMISSION_ERROR
+
+$permission_error2 = <<PERMISSION_ERROR2
+<html>
+<head><title>#{$title} - permission error</title></head>
+<body>
+<h1>#{$title} - permission error</h1>
+<p>I cannot make file in "<code><%= @path %></code>".</p>
+<p>Change permission to be able to access by WWW server.<br />
+<p>ex. <code>chmod o+w <%= @path %></code></p>
+</body>
+</html>
+PERMISSION_ERROR2
+
+$config_start = <<CONFIG_START
+<html>
+<head><title>#{$title} - starting configuration</title></head>
+<body>
+<h1>#{$title} - starting configuration</h1>
+<form method='post' action="#{ENV['SCRIPT_NAME']}">
+<input type="hidden" name="action" value="start" />
+<h2>Administrator's Password</h2>
+<p>
+Password: <input type="password" name="password" /><br />
+Password again: <input type="password" name="password2" />
+</p>
+<h2>Location of Static HTML files</h2>
+<p>
+Path: <input name="path" size="60" value="<%= @path %>" /><br />
+URL: <input name="url" size="60" value="<%= @url %>" />
+</p>
+<h2>Location of Ruby interpreter</h2>
+<p>
+Path: <input name="ruby" size="60" value="<%= @ruby %>" /><br />
+</p>
+<p>
+<input type="submit" value="Submit" />
+</p>
+</form>
+</body>
+</html>
+CONFIG_START
+
+$success = <<SUCCESS
+<html>
+<head><title>#{$title} - login</title></head>
+<body>
+<h1>#{$title} - login</h1>
+<form method="post" action="#{ENV['SCRIPT_NAME'].sub( /admin-init/ ,'admin')}">
+Password: <input type="password" name="password" />
+<input type="submit" value="login" />
+</form>
+</body>
+</html>
+SUCCESS
+
+cgi = CGI::new
+
+print cgi.header( 'type' => 'text/html' )
+
+#
+# checkin permission of cgi-bin and creation lock dir.
+#
+begin
+	Dir::mkdir( 'lock' ) unless FileTest::directory?( 'lock' )
+rescue
+	print $permission_error
+	exit
+end
+
+#
+# loading rubbs.conf
+#
+begin
+	File.readlines( 'rubbs.conf' ).each do |line| instance_eval( line ) end
+rescue
+end
+
+if not (@path and @url and @ruby and @password) then
+	if cgi.valid?( 'action' ) and cgi.params['action'][0] == 'start' and
+			cgi.valid?( 'password' ) and cgi.valid?( 'password2' ) and
+			cgi.params['password'][0] == cgi.params['password2'][0] and
+			cgi.valid?( 'path' ) and cgi.valid?( 'url' ) then
+		@password = cgi.params['password'][0].crypt( String::salt )
+		@path = cgi.params['path'][0]
+		@path += '/' if /\/$/ !~ @path
+		@ruby = cgi.params['ruby'][0]
+		@url = cgi.params['url'][0]
+		@url += '/' if /\/$/ !~ @url
+		begin
+			Dir::mkdir( "#{@path}admin" )
+			Dir::rmdir( "#{@path}admin" )
+		rescue
+			print ERbLight::new( $permission_error2 ).result( binding )
+			exit
+		end
+		unless @suffix then
+			suffix = File::basename( ENV['SCRIPT_NAME'] ).sub( /admin-init/, '' )
+			@suffix = suffix if suffix.length > 0
+		end
+		File::open( 'rubbs.conf', 'w' ) do |f|
+			f.puts %Q[@path = "#{@path}"]
+			f.puts %Q[@url = "#{@url}"]
+			f.puts %Q[@ruby = "#{@ruby}"]
+			f.puts %Q[@suffix = "#{@suffix}"]
+			f.puts %Q[@password = "#{@password}"]
+		end
+
+		# copying default css file
+		unless FileTest::exist?( "#{@path}rubbs.css" ) then
+			File::open( 'conf/rubbs.css' ) do |i|
+				File::open( "#{@path}rubbs.css", 'w' ) do |o|
+					o.write( i.read )
+				end
+			end
+		end
+	else
+		unless @ruby then
+			ENV['PATH'].split( /[ :;]+/ ).each do |path|
+				if FileTest::executable?( "#{path}/ruby" ) then
+					@ruby = "#{path}/ruby"
+					break
+				end
+			end
+		end
+		print ERbLight::new( $config_start ).result( binding )
+		exit
+	end
+end
+
+print $success
+

@@ -1,0 +1,68 @@
+=begin
+= RuBBS 1.0.7
+
+== What is RuBBS?
+RuBBS is A Web based bulletin board system(BBS) written by Ruby. The features of RuBBS are below:
+
+* Multiple board management.
+* Web based administration.
+* Low stress for the web server because RuBBS makes HTML file for recent reading.
+* E-mail notification.
+* cookie support.
+* Fully look and feel customize using eRuby.
+* Automatic making link for URL, but no HTML tags.
+
+== How to install
+At first, make directories to install RuBBS. One of directory is for copying CGI scripts, and another directory is for saving static HTML files. For example:
+
+* for CGI scripts: /var/www/cgi-bin/rubbs
+* for static HTML: /var/www/html/rubbs
+
+Both directories must have write permission from WWW server (using "chown" or "chmod" ...)
+
+Next step, to install CGI scripts. Copy all of files distributed to directory of CGI scripts. The directory tree is below: 
+
+  /var/www/cgi-bin/rubbs --- rubbs.rb
+      +- rubbs.rb
+      +- admin
+      +- admin-init
+      +- lock.rb
+      +- erb/
+      |   +- erb*.rb
+      +- conf/
+      |   +- *.conf
+      |   +- *.rhtml
+      |   +- *.rtxt
+		+- misc/
+		|   +- squeeze.*
+		|   +- postrubbs.*
+      +- README.*
+      +- CHANGES
+      +- COPYING
+
+If your environment is as same as mine, RuBBS will work as it is. But you must be little change if your environment have conditions below:
+
+(1) The suffix of CGI script is fixed (maybe ".cgi").
+     -> Change suffix of "admin" and "admin-init".
+(2) Ruby's path is abnormal.
+     -> When WWW server cannot find ruby command, you have to change first line of "admin" and "admin-init" below:
+
+        #!/usr/bin/env ruby  ->  #!/foo/bar/bin/ruby
+        (When Ruby is installed in /foo/bar/.)
+
+== How to use
+Access to "admin" via WWW Browser. "admin" makes other setting automatically. Then you can see "Administration Tool - starting configuration". So fill all of items.
+
+After "starting configuration", you will see the entry page of "Administration Tool" it has a password field. You can start to make other settings from this page. "Administration Tool" have features below:
+
+* Changing system setting.
+* Making new BBS.
+
+== License
+Copyright (C) 2001, All right reserved by TADA Tadashi <sho@spc.gr.jp>
+
+You can redistribute it and/or modify it under GPL2.
+
+And erb/* are written by Masatoshi Seki <http://www2a.biglobe.ne.jp/~seki/ruby/>. Thanks a lot!
+=end
+

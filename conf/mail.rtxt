@@ -1,0 +1,17 @@
+From: <%= name %> <<%= mail %>>
+To: <%= reply %>
+Reply-To: <%= reply %>
+Date: <%= date %>
+Message-Id: <%= message_id %><%
+if not @reply_to.empty? %>
+In-Reply-To: <%= @in_reply_to %><% end %>
+Subject: (<%= @name %>:<%= serial %>) <%= subject %>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="<%= encoding %>"
+Content-Transfer-Encoding: 7bit
+Errors-To: <%= @mail %>
+X-Mailer: RuBBS <%= RUBBS_VERSION %>
+X-URL: http://www.spc.gr.jp/bbs/RuBBS.html
+
+<%= contents %>
+

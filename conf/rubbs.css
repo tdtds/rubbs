@@ -1,0 +1,167 @@
+/*
+ default.css: CSS for RuBBS $Revision: 1.5 $
+ */
+body {
+	background-color: white;
+	color: black;
+}
+
+h1 {
+	text-align: center;
+}
+
+div.header {
+}
+
+div.footer {
+	font-size: small;
+}
+
+div.article {
+}
+
+form.subject {
+	color: black;
+	background-color: #ddd;
+	padding: 0px 1px 0px 0.5em;
+	margin-bottom: 0.2em;
+	font-size: small;
+	font-weight: normal;
+}
+form.subject h2 {
+	margin-bottom: 0.2em;
+	font-size: small;
+	font-weight: normal;
+}
+/* for old RuBBS: div.subject */
+
+span.serial {
+}
+
+span.subject {
+	font-size: medium;
+	font-weight: bold;
+}
+
+span.mail {
+}
+
+span.date {
+	font-size: x-small;
+}
+
+input.reply, span.replyto {
+	color: black;
+	background-color: #c0c0c0;
+	border-style: outset;
+	border-width: 1px;
+	border-color: white;
+	font-size: x-small;
+	vertical-align: middle;
+}
+
+span.replyto {
+	padding-left: 2px;
+	padding-right: 2px;
+}
+
+span.replyto a:link, span.replyto a:visited {
+	color: black;
+}
+
+p.contents {
+	color: black;
+	background-color: white;
+	padding: 4px;
+	margin-top: 0.2em;
+	margin-left: 2em;
+}
+
+span.quote {
+	color: #666;
+	background-color: white;
+}
+
+
+form.newpost {
+	text-align: right;
+}
+
+input.newpost {
+	color: black;
+	background-color: #c0c0c0;
+	border-style: outset;
+	border-width: 1px;
+	border-color: white;
+}
+
+p.navi {
+	text-align: right;
+}
+
+p.navi a {
+	background-color: #c0c0c0;
+	border-style: outset;
+	border-width: 1px;
+	padding: 2px;
+	color: black;
+}
+
+form.admin {
+	text-align: right;
+	font-size: small;
+}
+
+form.admin input {
+	color: black;
+	background-color: #c0c0c0;
+	font-size: x-small;
+}
+
+form.post {
+	color: black;
+	background-color: #d0d0d0;
+	padding: 1em 1em 1em 1em;
+}
+
+input.post {
+}
+
+p.copyright {
+	text-align: right;
+}
+
+img {
+	border-width: 0px 0px 0px 0px;
+}
+
+hr {
+	height: 1px;
+}
+
+hr.article {
+	display: none;
+}
+
+div.conf {
+	color: black;
+	background-color: #d0d0d0;
+	padding: 0em 1em 1em 1em;
+}
+
+form.conf {
+}
+
+input.conf, select.conf, textarea.conf {
+	margin-left: 2em;
+}
+
+p.msg {
+	text-align: center;
+	background-color: black;
+	color: white;
+	padding: 1em 1em 1em 1em;
+	font-size: large;
+	font-weight: bold;
+}
+
